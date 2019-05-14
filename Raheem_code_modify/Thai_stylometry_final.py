@@ -7,7 +7,7 @@ import numpy as np
 # from sklearn import preprocessing
 # from sklearn.datasets.samples_generator import make_blobs
 from collections import defaultdict
-import math
+import math, re
 import random
 import multiprocessing
 from numpy import genfromtxt
@@ -29,6 +29,8 @@ parser.add_argument('-b', '--book_list', nargs='+', help='lists of query set fro
 parser.add_argument('-f', '--fragment_size', nargs='+', help='Number of fragments')
 parser.add_argument('-k', '--topKNN', nargs='+', help='Number of K Nearest Neighbors')
 parser.add_argument('-o', '--output_name', type=str, help='Output file name')
+parser.add_argument('-t', '--test_experiment', type=str, help='Test')
+
 arg = parser.parse_args()
 
 book = arg.book_list
@@ -934,7 +936,7 @@ def result_compilation():
     return SASHD, SAMHD, SAPHD
 
 
-def result_compilation_openset():
+def result_compilation_openset(b_i):
     replacements = {'[': '', '(': '', ']': '', ')': ''}
 
     openset_data = df()
@@ -974,7 +976,11 @@ def result_compilation_openset():
         openset_data.loc[index, "author_phd"] = results[18][0].strip()
         openset_data.loc[index, "percent_phd"] = results[18][1].strip()
 
-    openset_data.to_excel("Openset_data.xlsx")
+    query_trial = ''
+    for bookis in re.findall("[0-9]", b_i):
+        query_trial += bookis
+
+    openset_data.to_excel("Openset_data"+str(query_trial)+".xlsx")
 
     return openset_data
 
@@ -1194,19 +1200,25 @@ for f_i in f:
             first00()
             first01()
             first02()
-            (SASHD, SAMHD, SAPHD) = result_compilation()
-            SHD_all += SASHD
-            MHD_all += SAMHD
-            PHD_all += SAPHD
-        # write to csv each fold validation
-        output_file.loc[(f_i, k_i), "SHD"] = SHD_all / len(book)
-        output_file.loc[(f_i, k_i), "MHD"] = MHD_all / len(book)
-        output_file.loc[(f_i, k_i), "PHD"] = PHD_all / len(book)
 
-        print(output_file)
+            if t == 'close_set':
+                (SASHD, SAMHD, SAPHD) = result_compilation()
+                SHD_all += SASHD
+                MHD_all += SAMHD
+                PHD_all += SAPHD
 
+            elif t == 'open_set':
+                result_compilation_openset(b_i)
 
-    output_file.to_csv(r''+ output_name + ".csv")
+        if t == 'close_set':
+            # write to csv each fold validation
+            output_file.loc[(f_i, k_i), "SHD"] = SHD_all / len(book)
+            output_file.loc[(f_i, k_i), "MHD"] = MHD_all / len(book)
+            output_file.loc[(f_i, k_i), "PHD"] = PHD_all / len(book)
+
+            print(output_file)
+
+            output_file.to_csv(r'' + output_name + ".csv")
 
 output_file.to_csv(r''+ output_name + ".csv")
 
