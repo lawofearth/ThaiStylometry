@@ -36,6 +36,7 @@ arg = parser.parse_args()
 book = arg.book_list
 f = arg.fragment_size
 k = arg.topKNN
+test_experiment = arg.test_experiment
 
 output_name = arg.output_name
 
@@ -936,7 +937,7 @@ def result_compilation():
     return SASHD, SAMHD, SAPHD
 
 
-def result_compilation_openset(b_i):
+def result_compilation_openset(f_i, k_i, b_i):
     replacements = {'[': '', '(': '', ']': '', ')': ''}
 
     openset_data = df()
@@ -954,8 +955,12 @@ def result_compilation_openset(b_i):
     for filename in os.listdir('./result'):
         my_data.append(filename)
 
-    for index, filename in enumerate(my_data):
+    if 'expResult10KK' in os.listdir('./'):
+        shutil.rmtree('./expResult10KK')
 
+    os.mkdir('./expResult10KK')
+
+    for filename in my_data:
         with open("./result/" + filename) as infile, open("./expResult10KK/" + filename + filename, 'w') as outfile:
             for line in infile:
                 for src, target in replacements.items():
@@ -980,7 +985,7 @@ def result_compilation_openset(b_i):
     for bookis in re.findall("[0-9]", b_i):
         query_trial += bookis
 
-    openset_data.to_excel("Openset_data"+str(query_trial)+".xlsx")
+    openset_data.to_excel("Openset_data"+"_F_"+str(f_i)+"_K_"+str(k_i)+"_Q_"+str(query_trial)+".xlsx")
 
     return openset_data
 
@@ -1201,16 +1206,16 @@ for f_i in f:
             first01()
             first02()
 
-            if t == 'close_set':
+            if test_experiment == 'close_set':
                 (SASHD, SAMHD, SAPHD) = result_compilation()
                 SHD_all += SASHD
                 MHD_all += SAMHD
                 PHD_all += SAPHD
 
-            elif t == 'open_set':
-                result_compilation_openset(b_i)
+            elif test_experiment == 'open_set':
+                result_compilation_openset(f_i, k_i, b_i)
 
-        if t == 'close_set':
+        if test_experiment == 'close_set':
             # write to csv each fold validation
             output_file.loc[(f_i, k_i), "SHD"] = SHD_all / len(book)
             output_file.loc[(f_i, k_i), "MHD"] = MHD_all / len(book)
