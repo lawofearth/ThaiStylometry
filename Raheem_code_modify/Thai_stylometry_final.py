@@ -30,6 +30,7 @@ parser.add_argument('-f', '--fragment_size', nargs='+', help='Number of fragment
 parser.add_argument('-k', '--topKNN', nargs='+', help='Number of K Nearest Neighbors')
 parser.add_argument('-o', '--output_name', type=str, help='Output file name')
 parser.add_argument('-t', '--test_experiment', type=str, help='Test')
+parser.add_argument('-ad', '--all_data_list', nargs='+', help='lists of all data file per test ...')
 
 arg = parser.parse_args()
 
@@ -37,6 +38,7 @@ book = arg.book_list
 f = arg.fragment_size
 k = arg.topKNN
 test_experiment = arg.test_experiment
+all_data_list = arg.all_data_list
 
 output_name = arg.output_name
 
@@ -656,9 +658,6 @@ def queryExp(q):
 
         fileNameString = "./result/" + str(q)
         f = open(fileNameString, 'wb')
-
-        #        fileNameString = str(q) + "DocId result.txt"
-        #       f = open(fileNameString,'wb')
         f.write(data)
         f.close()
         return
@@ -666,8 +665,8 @@ def queryExp(q):
         return
 
 
-def extention(f):
-    my_data = loadtxt('./crosslingual_features_final.csv', delimiter=',')
+def extention(f, eachdata):
+    my_data = loadtxt('./'+str(eachdata), delimiter=',')
     my_data = np.asarray(my_data)
     # print("Data:", my_data)
     group = int(f)
@@ -940,6 +939,7 @@ def result_compilation():
 def result_compilation_openset(f_i, k_i, b_i):
     replacements = {'[': '', '(': '', ']': '', ')': ''}
 
+    openset_data = []
     openset_data = df()
     openset_data["book"] = []
     openset_data["author0"] = []
@@ -960,7 +960,7 @@ def result_compilation_openset(f_i, k_i, b_i):
 
     os.mkdir('./expResult10KK')
 
-    for filename in my_data:
+    for index, filename in enumerate(my_data):
         with open("./result/" + filename) as infile, open("./expResult10KK/" + filename + filename, 'w') as outfile:
             for line in infile:
                 for src, target in replacements.items():
@@ -971,6 +971,10 @@ def result_compilation_openset(f_i, k_i, b_i):
         with open("./expResult10KK/" + filename + filename) as inputfile:
             for row in csv.reader(inputfile):
                 results.append(row)
+
+        print "//////////////////////////////////////////////"
+        print results
+        print openset_data
 
         openset_data.loc[index, "book"] = results[0][0].strip()
         openset_data.loc[index, "author0"] = results[15][0].strip()
@@ -1060,18 +1064,23 @@ index = pd.MultiIndex.from_tuples(tuples, names=['Fragments', 'KNearestNeighbor'
 output_file = df(index=index, columns=("SHD", "MHD", "PHD"))
 
 # run program
-for f_i in f:
+for index_f, f_i in enumerate(f):
+
     print(f_i)
-    extention(f_i)
+
     for k_i in k:
 
         print "topknn", k_i
 
         SHD_all, MHD_all, PHD_all = 0, 0, 0
 
-        for b_i in book:
+        for index_b, b_i in enumerate(book):
 
             print b_i
+
+            eachdata = all_data_list[index_b]
+            extention(f_i, eachdata)
+
             get_set_ids(b_i)
 
             # print(os.listdir('./'))
@@ -1121,7 +1130,7 @@ for f_i in f:
                 for j in range(len(doc[i])):
                     doc[i][j] = float(doc[i][j])
                     querySet.append(doc[i][j])
-            print querySet[0:10]
+            print "Query set is ", querySet[0:10]
 
             print "indexing"
             start = time.time()
@@ -1213,7 +1222,7 @@ for f_i in f:
                 PHD_all += SAPHD
 
             elif test_experiment == 'open_set':
-                result_compilation_openset(f_i, k_i, b_i)
+                z = result_compilation_openset(f_i, k_i, b_i)
 
         if test_experiment == 'close_set':
             # write to csv each fold validation
