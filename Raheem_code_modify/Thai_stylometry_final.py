@@ -540,7 +540,8 @@ def multiprocessNorm(dataset):
 def queryExp(q):
     try:
         queryParaList = doc_to_para_dict[q]
-    except KeyError:
+    except KeyError as e:
+        print 'I got a KeyError - reason "%s"' % str(e)
         return
     data = ""
     queryParaList = doc_to_para_dict[q]
@@ -661,7 +662,9 @@ def queryExp(q):
         f.write(data)
         f.close()
         return
-    except:
+
+    except KeyError:
+        print "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\QueryExp DataError"
         return
 
 
