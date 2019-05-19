@@ -708,6 +708,10 @@ def extention(f, eachdata):
         a = csv.writer(fp, delimiter=',')
         a.writerows(dataset)
 
+    with open('raheem_test.csv', 'w') as fp:
+        a = csv.writer(fp, delimiter=',')
+        a.writerows(dataset)
+
 
 def get_set_ids(docu_namebu):
     my_data = loadtxt('./raheem.csv', delimiter=',')
@@ -727,13 +731,27 @@ def get_set_ids(docu_namebu):
             querySet.append(int(doc[i][j]))
 
     q_doc_ids = querySet
+
+    # XXX
+    with open("q_doc_ids.csv", "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(q_doc_ids)
+
     my_data = my_data[np.logical_or.reduce([my_data[:, 1] == x for x in q_doc_ids])]
 
-    labels = my_data[:, 0:2]
-    labels = np.vstack({tuple(row) for row in labels})
-    # for x in labels:
+    # XXX
+    with open("my_data.csv", "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(my_data)
 
-    # print(x)
+    labels = my_data[:, 0:2]
+
+    # XXX
+    with open("labels.csv", "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(labels)
+
+    labels = np.vstack({tuple(row) for row in labels})
 
     if 'query_set_ids.csv' in os.listdir('./'):
         print('delete query set ids')
@@ -743,6 +761,10 @@ def get_set_ids(docu_namebu):
     print(os.listdir('./'))
 
     with open("query_set_ids.csv", "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(labels)
+
+    with open("query_set_ids_test.csv", "wb") as f:
         writer = csv.writer(f)
         writer.writerows(labels)
 
