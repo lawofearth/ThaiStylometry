@@ -541,7 +541,7 @@ def queryExp(q):
     try:
         queryParaList = doc_to_para_dict[q]
     except KeyError as e:
-        print 'I got a KeyError - reason "%s"' % str(e)
+        # print 'I got a KeyError - reason "%s"' % str(e)
         return
     data = ""
     queryParaList = doc_to_para_dict[q]
@@ -732,25 +732,11 @@ def get_set_ids(docu_namebu):
 
     q_doc_ids = querySet
 
-    # XXX
-    with open("q_doc_ids.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(q_doc_ids)
+    print q_doc_ids
 
     my_data = my_data[np.logical_or.reduce([my_data[:, 1] == x for x in q_doc_ids])]
 
-    # XXX
-    with open("my_data.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(my_data)
-
     labels = my_data[:, 0:2]
-
-    # XXX
-    with open("labels.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(labels)
-
     labels = np.vstack({tuple(row) for row in labels})
 
     if 'query_set_ids.csv' in os.listdir('./'):
@@ -761,10 +747,6 @@ def get_set_ids(docu_namebu):
     print(os.listdir('./'))
 
     with open("query_set_ids.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(labels)
-
-    with open("query_set_ids_test.csv", "wb") as f:
         writer = csv.writer(f)
         writer.writerows(labels)
 
@@ -1183,7 +1165,7 @@ for index_f, f_i in enumerate(f):
                 doc_to_para_dict[value].append(key)
             doc_to_para_dict = dict(doc_to_para_dict)
 
-            # print "D2Pd", doc_to_para_dict
+            print "D2Pd", doc_to_para_dict
 
             au_to_para_dict = defaultdict(list)
             for key, value in sorted(para_to_au_dict.iteritems()):
