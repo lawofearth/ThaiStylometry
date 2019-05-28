@@ -202,7 +202,7 @@ def getHitAboveTWithFilter(query, hitTable, dataset, paraIndex, IndexPara, hitpa
 
 
 def convertPointToDoc(point):
-    return para_to_doc_dict[point];
+    return para_to_doc_dict[point]
 
 
 def convertQdicttoDocdict(query, Qdict):
@@ -663,8 +663,8 @@ def queryExp(q):
         f.close()
         return
 
-    except KeyError:
-        print "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\QueryExp DataError"
+    except (KeyError, ZeroDivisionError) as e:
+        print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\QueryExp DataError %s" % str(e))
         return
 
 
@@ -948,7 +948,7 @@ def result_compilation_openset(f_i, k_i, b_i):
 
     openset_data = []
     openset_data = df()
-    openset_data["book"] = []
+    openset_data["Fragments"] = []
     openset_data["author0"] = []
     openset_data["author_shd"] = []
     openset_data["percent_shd"] = []
@@ -983,7 +983,7 @@ def result_compilation_openset(f_i, k_i, b_i):
         print results
         print openset_data
 
-        openset_data.loc[index, "book"] = results[0][0].strip()
+        openset_data.loc[index, "Fragments"] = results[0][0].strip()
         openset_data.loc[index, "author0"] = results[15][0].strip()
         openset_data.loc[index, "author_shd"] = results[16][0].strip()
         openset_data.loc[index, "percent_shd"] = results[16][1].strip()
@@ -1165,7 +1165,7 @@ for index_f, f_i in enumerate(f):
                 doc_to_para_dict[value].append(key)
             doc_to_para_dict = dict(doc_to_para_dict)
 
-            print "D2Pd", doc_to_para_dict
+            # print "D2Pd", doc_to_para_dict
 
             au_to_para_dict = defaultdict(list)
             for key, value in sorted(para_to_au_dict.iteritems()):
