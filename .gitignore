@@ -1,10 +1,7 @@
-
 *.csv
-
 *.xlsx
-
 Raheem_code_modify/Result/
-
 Raheem_code_modify/expResult10KK/
-
+*.json
 *.txt
+*.pyc

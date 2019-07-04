@@ -16,7 +16,7 @@ import linecache
 import smjModule
 import heapq
 from scipy.spatial.distance import euclidean
-import csv
+import csv, json
 import os, sys, argparse, shutil
 from pandas import DataFrame as df
 import pandas as pd
@@ -134,6 +134,9 @@ def ComputeHashnew(dataset):
     N = len(dataset)
     hash_matrixQ = [[0.0 for x in range(L)] for y in range(N)]
     hash_matrix = smjModule.HashCalC(dataset, hash_matrixQ, RandomA_Q, b, L, W, N, D, K)
+
+    with open("./result_hash/" + str(N) + "hash_matrix.json", "wb") as f:
+        json.dump(hash_matrix, f)
     # print hash_matrixQ
     return hash_matrix
 
@@ -545,8 +548,6 @@ def queryExp(q):
         return
     data = ""
     queryParaList = doc_to_para_dict[q]
-    # print ""
-    # print "DocID", q
     data += (str(q) + "\n")
 
     try:
@@ -567,6 +568,7 @@ def queryExp(q):
                                                      combinedhitQP, datasetP, paraIndex, hitparaIndex, "lsh")
         LSH_SHDTop5ListTime = time.time() - start
 
+
         #print "Time to return topk doclist (LSH+SHD):", LSH_SHDTop5ListTime
         data += (str(LSH_SHDTop5ListTime) + "\n")
 
@@ -575,12 +577,17 @@ def queryExp(q):
         q_hit_above_T = getHitAboveT(queryParaList, combinedhitQP, hitparaIndex, IndexPara)
         doc_hit_above_T_dict = convertQdicttoDocdict(queryParaList, q_hit_above_T)
         ListLSH_ALL = getAllDoc(queryParaList, doc_hit_above_T_dict)
+
         LSHMHDLongListTime = time.time() - start
         #print "Time to generate long doc_list (LSH+MHD) ", LSHMHDLongListTime
         data += (str(LSHMHDLongListTime) + "\n")
         start = time.time()
         sortedListLSH = MHDPrunList(queryParaList, ListLSH_ALL, combinedhitQP, datasetm, paraIndex, R, hitparaIndex,
                                     doc_hit_above_T_dict, "lsh", MHDRatio)
+
+            # percent
+            # delete sortedListLSH
+
         #print "topknn indide function", topknn
         LSH_MHD_Result, LSH_MHD_values = geneMHDPrun(sortedListLSH, queryParaList, combinedhitQP, topknn, flagNum,
                                                      datasetm, paraIndex, hitparaIndex, MHDRatio, "lsh")
@@ -602,8 +609,18 @@ def queryExp(q):
         start = time.time()
         sortedListLSH = M2HDPrunList(queryParaList, ListLSH_ALL, combinedhitQP, datasetm, paraIndex, R, hitparaIndex,
                                      doc_hit_above_T_dict, "lsh", startp, endp)
+
+        # try01 correct this b4
+        
+
         LSH_M2HD_Result, LSH_M2HD_values = geneM2HDPrun(sortedListLSH, queryParaList, combinedhitQP, topknn, flagNum,
                                                         datasetm, paraIndex, hitparaIndex, "lsh", startp, endp)
+
+        # with open("./result_test/"+str(q)+"LSH_M2HD_Result.json", "wb") as f:
+        #     json.dump(LSH_M2HD_Result, f)
+        # with open("./result_test/"+str(q)+"LSH_M2HD_values.json", "wb") as f:
+        #     json.dump(LSH_M2HD_values, f)
+
         LSH_M2HD_len = LSH_M2HD_Result[0]
         LSH_M2HD_list = LSH_M2HD_Result[1]
 
@@ -705,10 +722,6 @@ def extention(f, eachdata):
         os.remove('raheem.csv')
 
     with open('raheem.csv', 'w') as fp:
-        a = csv.writer(fp, delimiter=',')
-        a.writerows(dataset)
-
-    with open('raheem_test.csv', 'w') as fp:
         a = csv.writer(fp, delimiter=',')
         a.writerows(dataset)
 
@@ -979,9 +992,9 @@ def result_compilation_openset(f_i, k_i, b_i):
             for row in csv.reader(inputfile):
                 results.append(row)
 
-        print "//////////////////////////////////////////////"
-        print results
-        print openset_data
+        #print "//////////////////////////////////////////////"
+        #print results
+        #print openset_data
 
         openset_data.loc[index, "Fragments"] = results[0][0].strip()
         openset_data.loc[index, "author0"] = results[15][0].strip()
@@ -1052,7 +1065,7 @@ def first01():
 def first02():
     start_time = time.time()
     pool_size = multiprocessing.cpu_count()
-    processNum = 15
+    processNum = 20
     pool = multiprocessing.Pool(processes=processNum, )
     temp = pool.map(queryExp, querySet, )
     pool.close()
